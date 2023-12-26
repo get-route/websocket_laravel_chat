@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\SendEvent;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\SendLikeRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
@@ -57,11 +60,18 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show( User $user)
     {
-        //
+        return inertia('User/Show', compact('user'));
     }
-
+    public function sendLike(User $user,SendLikeRequest $request){
+        $date = $request->validated();
+        $like_str = 'Your like from user with id'. $date['from_id'];
+        broadcast(new SendEvent($like_str,$user->id))->toOthers();
+        return response()->json([
+           'like_str'=>$like_str
+        ]);
+    }
     /**
      * Show the form for editing the specified resource.
      */
